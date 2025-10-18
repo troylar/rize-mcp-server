@@ -1,0 +1,53 @@
+{
+  "name": "get_rize_schema",
+  "description": "Fetch the complete Rize GraphQL schema via introspection. The schema includes all available queries, mutations, types, and fields. Results are cached for 1 hour by default to improve performance.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "force_refresh": {
+        "type": "boolean",
+        "description": "Force schema refresh, bypassing cache",
+        "default": false
+      },
+      "include_deprecated": {
+        "type": "boolean",
+        "description": "Include deprecated fields and types in the schema",
+        "default": false
+      }
+    },
+    "required": []
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "schema": {
+        "type": "object",
+        "description": "Complete GraphQL schema from introspection"
+      },
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "cached": {
+            "type": "boolean",
+            "description": "Whether result was served from cache"
+          },
+          "cached_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When schema was cached"
+          },
+          "ttl_remaining": {
+            "type": "integer",
+            "description": "Remaining cache TTL in seconds"
+          },
+          "execution_time_ms": {
+            "type": "number",
+            "description": "Query execution time in milliseconds"
+          }
+        },
+        "required": ["cached", "execution_time_ms"]
+      }
+    },
+    "required": ["schema", "metadata"]
+  }
+}

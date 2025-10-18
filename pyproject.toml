@@ -1,0 +1,228 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rize-mcp-server"
+version = "0.1.0"
+description = "Model Context Protocol (MCP) server for Rize API with GraphQL support"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "Troy Larson", email = "troy@example.com" }
+]
+keywords = ["mcp", "rize", "graphql", "fastmcp", "model-context-protocol"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+
+dependencies = [
+    "fastmcp>=0.2.0",
+    "httpx>=0.27.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Task automation
+    "invoke>=2.2.0",
+
+    # Testing
+    "pytest>=8.3.0",
+    "pytest-cov>=6.0.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-mock>=3.14.0",
+
+    # Linting and formatting
+    "ruff>=0.7.0",
+
+    # Type checking
+    "mypy>=1.13.0",
+    "types-invoke>=2.0.0",
+
+    # Build tools
+    "build>=1.2.0",
+    "hatchling>=1.25.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/troylar/rize-mcp-server"
+Documentation = "https://github.com/troylar/rize-mcp-server#readme"
+Repository = "https://github.com/troylar/rize-mcp-server"
+Issues = "https://github.com/troylar/rize-mcp-server/issues"
+
+[project.scripts]
+rize-mcp = "src.server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+]
+markers = [
+    "unit: Unit tests (fast, isolated)",
+    "integration: Integration tests (external API calls)",
+    "contract: Contract tests (MCP protocol compliance)",
+    "slow: Slow running tests",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+fail_under = 100.0
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if TYPE_CHECKING:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "@abstractmethod",
+    "@abc.abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+indent-width = 4
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "ANN",    # flake8-annotations
+    "ASYNC",  # flake8-async
+    "S",      # flake8-bandit (security)
+    "B",      # flake8-bugbear
+    "A",      # flake8-builtins
+    "COM",    # flake8-commas
+    "C4",     # flake8-comprehensions
+    "DTZ",    # flake8-datetimez
+    "T10",    # flake8-debugger
+    "EM",     # flake8-errmsg
+    "ISC",    # flake8-implicit-str-concat
+    "ICN",    # flake8-import-conventions
+    "G",      # flake8-logging-format
+    "PIE",    # flake8-pie
+    "T20",    # flake8-print
+    "PT",     # flake8-pytest-style
+    "Q",      # flake8-quotes
+    "RSE",    # flake8-raise
+    "RET",    # flake8-return
+    "SIM",    # flake8-simplify
+    "TID",    # flake8-tidy-imports
+    "TCH",    # flake8-type-checking
+    "ARG",    # flake8-unused-arguments
+    "PTH",    # flake8-use-pathlib
+    "ERA",    # eradicate
+    "PL",     # pylint
+    "TRY",    # tryceratops
+    "RUF",    # ruff-specific rules
+]
+ignore = [
+    "ANN101",  # Missing type annotation for self in method
+    "ANN102",  # Missing type annotation for cls in classmethod
+    "COM812",  # Trailing comma missing (conflicts with formatter)
+    "ISC001",  # Implicit string concatenation (conflicts with formatter)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "S101",    # Use of assert detected
+    "PLR2004", # Magic value used in comparison
+    "ANN001",  # Missing type annotation for function argument
+    "ANN201",  # Missing return type annotation for public function
+    "S105",    # Possible hardcoded password (test data)
+    "PTH",     # Use pathlib (os.path is fine in tests)
+    "PLC0415", # Import outside top-level (needed after env setup in tests)
+    "TRY301",  # Abstract raise to inner function (test code)
+    "PT011",   # pytest.raises too broad (assertions verify specific message)
+    "RUF043",  # Match pattern not raw string (test matchers can be non-raw)
+]
+"tasks.py" = [
+    "ANN001",  # Missing type annotation for function argument
+    "ANN201",  # Missing return type annotation for public function
+    "T201",    # Print found
+    "A001",    # Variable shadowing builtin (format is intentional)
+    "PT028",   # Pytest fixture parameter with default (false positive for invoke tasks)
+    "ARG001",  # Unused argument (ctx required by invoke)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+force-single-line = false
+lines-after-imports = 2
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_unimported = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+check_untyped_defs = true
+strict_equality = true
+pretty = true
+show_error_codes = true
+show_error_context = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = "fastmcp.*"
+ignore_missing_imports = true

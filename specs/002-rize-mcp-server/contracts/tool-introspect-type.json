@@ -1,0 +1,91 @@
+{
+  "name": "introspect_type",
+  "description": "Get detailed information about a specific GraphQL type from the Rize schema. Returns the type's fields, descriptions, and whether fields are required or return lists. Useful for understanding what data you can query for a given entity.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "type_name": {
+        "type": "string",
+        "description": "Name of the GraphQL type to introspect",
+        "minLength": 1,
+        "examples": ["Customer", "Transaction", "Account", "Transfer"]
+      },
+      "include_fields": {
+        "type": "boolean",
+        "description": "Include field details in the response",
+        "default": true
+      },
+      "include_deprecated": {
+        "type": "boolean",
+        "description": "Include deprecated fields in the response",
+        "default": false
+      }
+    },
+    "required": ["type_name"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "type": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Type name"
+          },
+          "kind": {
+            "type": "string",
+            "description": "Type kind (OBJECT, SCALAR, ENUM, etc.)",
+            "enum": ["OBJECT", "SCALAR", "ENUM", "INPUT_OBJECT", "INTERFACE", "UNION"]
+          },
+          "description": {
+            "type": "string",
+            "description": "Type description from schema"
+          },
+          "fields": {
+            "type": "array",
+            "description": "Fields available on this type",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Field name"
+                },
+                "type_name": {
+                  "type": "string",
+                  "description": "Field type name"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Field description"
+                },
+                "is_required": {
+                  "type": "boolean",
+                  "description": "Whether field is non-null (required)"
+                },
+                "is_list": {
+                  "type": "boolean",
+                  "description": "Whether field returns a list"
+                }
+              },
+              "required": ["name", "type_name", "is_required", "is_list"]
+            }
+          }
+        },
+        "required": ["name", "kind"]
+      }
+    },
+    "required": ["type"]
+  },
+  "errors": [
+    {
+      "code": "TYPE_NOT_FOUND",
+      "description": "The specified type does not exist in the schema"
+    },
+    {
+      "code": "SCHEMA_NOT_LOADED",
+      "description": "Schema not yet loaded. Call get_rize_schema first."
+    }
+  ]
+}

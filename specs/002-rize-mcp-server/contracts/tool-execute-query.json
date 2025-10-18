@@ -1,0 +1,92 @@
+{
+  "name": "execute_custom_query",
+  "description": "Execute a custom GraphQL query against the Rize API. Supports variables, filtering, and pagination. Query results are limited to 1000 records maximum. Use variables for dynamic values and pagination cursors.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "GraphQL query string",
+        "minLength": 1,
+        "examples": [
+          "query { customers { edges { node { id email } } } }",
+          "query GetCustomer($id: ID!) { customer(id: $id) { id email firstName lastName } }"
+        ]
+      },
+      "variables": {
+        "type": "object",
+        "description": "Optional variables for the GraphQL query",
+        "additionalProperties": true,
+        "default": null,
+        "examples": [
+          {"customerId": "cus_123", "limit": 10},
+          {"startDate": "2024-01-01", "endDate": "2024-12-31"}
+        ]
+      },
+      "operation_name": {
+        "type": "string",
+        "description": "Optional operation name for the query",
+        "default": null,
+        "examples": ["GetCustomers", "ListTransactions"]
+      }
+    },
+    "required": ["query"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "data": {
+        "type": "object",
+        "description": "Query result data",
+        "additionalProperties": true
+      },
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "operation_name": {
+            "type": "string",
+            "description": "Name of the executed operation"
+          },
+          "execution_time_ms": {
+            "type": "number",
+            "description": "Query execution time in milliseconds",
+            "minimum": 0
+          },
+          "record_count": {
+            "type": "integer",
+            "description": "Number of records returned (if applicable)",
+            "minimum": 0
+          },
+          "cached": {
+            "type": "boolean",
+            "description": "Whether the result was served from cache"
+          }
+        },
+        "required": ["execution_time_ms", "cached"]
+      }
+    },
+    "required": ["data", "metadata"]
+  },
+  "errors": [
+    {
+      "code": "GRAPHQL_ERROR",
+      "description": "GraphQL query syntax or execution error"
+    },
+    {
+      "code": "RATE_LIMIT_ERROR",
+      "description": "API rate limit exceeded. Retry-After header indicates wait time."
+    },
+    {
+      "code": "NETWORK_ERROR",
+      "description": "Network connectivity issue. Automatic retry with exponential backoff."
+    },
+    {
+      "code": "AUTH_ERROR",
+      "description": "Invalid or expired API key"
+    },
+    {
+      "code": "RECORD_LIMIT_ERROR",
+      "description": "Query would exceed 1000 record limit. Use pagination."
+    }
+  ]
+}
